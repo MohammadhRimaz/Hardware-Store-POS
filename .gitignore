@@ -25,8 +25,7 @@ dist-ssr
 
 .env
 
-dist-electron/main.js
-dist-electron/preload.mjs
+dist-electron
 package-lock.json
 src/main.tsx
 vite.config.ts
