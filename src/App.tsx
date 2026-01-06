@@ -1,4 +1,12 @@
+import { useEffect } from "react";
+
 function App() {
+  useEffect(() => {
+    window.api.getCategories().then(console.log);
+    window.api.getProducts().then(console.log);
+    window.api.getCustomers().then(console.log);
+  }, []);
+
   return (
     <div
       style={{

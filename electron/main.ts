@@ -1,4 +1,11 @@
+import { ipcMain } from "electron";
 import db from "../src/database/knex";
+import {
+  createCategory,
+  getAllCategories,
+} from "../src/services/category.service";
+import { getAllProducts } from "../src/services/product.service";
+import { getAllCustomers } from "../src/services/customer.service";
 import { app, BrowserWindow } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -81,6 +88,28 @@ app.whenReady().then(async () => {
   } catch (err) {
     console.error("Failed to connect to SQLite database:", err);
   }
+
+  // ===== IPC HANDLERS =====
+
+  // Categories
+  ipcMain.handle("category:create", async (_, name: string) => {
+    await createCategory(name);
+    return true;
+  });
+
+  ipcMain.handle("category:getAll", async () => {
+    return getAllCategories();
+  });
+
+  // Products
+  ipcMain.handle("product:getAll", async () => {
+    return getAllProducts();
+  });
+
+  // Customers
+  ipcMain.handle("customer:getAll", async () => {
+    return getAllCustomers();
+  });
 
   // ✅ 3. Create the window only after DB is ready
   createWindow();
