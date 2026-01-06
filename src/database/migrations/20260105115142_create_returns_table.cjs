@@ -9,6 +9,7 @@ exports.up = function (knex) {
       .references("id")
       .inTable("sales")
       .onDelete("RESTRICT");
+
     table
       .integer("product_id")
       .unsigned()

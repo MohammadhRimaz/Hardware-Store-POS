@@ -9,6 +9,7 @@ exports.up = function (knex) {
       .references("id")
       .inTable("sales")
       .onDelete("CASCADE");
+
     table
       .integer("product_id")
       .unsigned()
@@ -17,7 +18,7 @@ exports.up = function (knex) {
       .inTable("products")
       .onDelete("RESTRICT");
 
-    table.integer("quantity").notNullable().defaultTo(1);
+    table.integer("quantity").notNullable();
     table.decimal("unit_price", 10, 2).notNullable();
     table.decimal("total_price", 10, 2).notNullable();
   });

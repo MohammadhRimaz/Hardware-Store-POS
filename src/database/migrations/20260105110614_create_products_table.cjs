@@ -30,7 +30,6 @@ exports.up = function (knex) {
     // Optional image reference (path or filename)
     table.string("image").nullable();
 
-    // Timestamps
     table.timestamp("created_at").defaultTo(knex.fn.now());
     table.timestamp("updated_at").defaultTo(knex.fn.now());
   });

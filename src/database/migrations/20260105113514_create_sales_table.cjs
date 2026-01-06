@@ -10,13 +10,13 @@ exports.up = function (knex) {
       .inTable("customers")
       .onDelete("SET NULL");
 
-    // Financial details
+    // Financials
     table.decimal("subtotal", 10, 2).notNullable();
     table.decimal("discount", 10, 2).notNullable().defaultTo(0);
     table.decimal("total_amount", 10, 2).notNullable();
 
-    // Payment details
-    table.enu("paymnet_method", ["CASH", "CHEQUE", "CREDIT"]).notNullable();
+    // Payment
+    table.enu("payment_method", ["CASH", "CHEQUE", "CREDIT"]).notNullable();
 
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });
