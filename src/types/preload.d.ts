@@ -1,12 +1,16 @@
 export {};
 
+type IPCResponse<T> =
+  | { success: true; data: T }
+  | { success: false; error: string };
+
 declare global {
   interface Window {
     api: {
-      createCategory: (name: string) => Promise<boolean>;
-      getCategories: () => Promise<any[]>;
-      getProducts: () => Promise<any[]>;
-      getCustomers: () => Promise<any[]>;
+      createCategory: (name: string) => Promise<IPCResponse<null>>;
+      getCategories: () => Promise<IPCResponse<any[]>>;
+      getProducts: () => Promise<IPCResponse<any[]>>;
+      getCustomers: () => Promise<IPCResponse<any[]>>;
     };
   }
 }

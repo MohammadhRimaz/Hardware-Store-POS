@@ -58,55 +58,112 @@ app.on("activate", () => {
 // ✅ APP INITIALIZATION
 // =========================================================
 app.whenReady().then(async () => {
-  // 1. Define DB Path FIRST
-  const dbPath = path.join(app.getPath("userData"), "store.db");
+  try {
+    // 1. Define DB Path FIRST
+    const dbPath = path.join(app.getPath("userData"), "store.db");
 
-  // 2. Set the ENV variable so Knex can see it
-  process.env.DB_PATH = dbPath;
-  console.log("Database Path set to:", dbPath);
+    // 2. Set the ENV variable so Knex can see it
+    process.env.DB_PATH = dbPath;
+    console.log("Database Path set to:", dbPath);
 
-  // 3. DYNAMICALLY Import DB and Services
-  // This ensures they load AFTER process.env.DB_PATH is set
-  const { default: db } = await import("../src/database/knex");
+    // 3. DYNAMICALLY Import DB and Services
+    // This ensures they load AFTER process.env.DB_PATH is set
+    // const { default: db } = await import("../src/database/knex");
 
-  // Import services dynamically
-  const { createCategory, getAllCategories } = await import(
-    "../src/services/category.service"
-  );
-  const { getAllProducts } = await import("../src/services/product.service");
-  const { getAllCustomers } = await import("../src/services/customer.service");
+    // Import services dynamically
+    const { createCategory, getAllCategories } = await import(
+      "../src/services/category.service"
+    );
+    const { getAllProducts } = await import("../src/services/product.service");
+    const { getAllCustomers } = await import(
+      "../src/services/customer.service"
+    );
 
-  // 4. Run Migrations Automatically
-  // This creates the tables if they don't exist
-  // try {
-  //   console.log("Running Database Migrations...");
-  //   await db.migrate.latest();
-  //   console.log("Migrations Finished. Tables created.");
+    // 4. Run Migrations Automatically
+    // This creates the tables if they don't exist
+    // try {
+    //   console.log("Running Database Migrations...");
+    //   await db.migrate.latest();
+    //   console.log("Migrations Finished. Tables created.");
 
-  // Optional: Run Seeds if needed
-  // await db.seed.run();
-  // } catch (err) {
-  //   console.error("Migration Failed:", err);
-  // }
+    // Optional: Run Seeds if needed
+    // await db.seed.run();
+    // } catch (err) {
+    //   console.error("Migration Failed:", err);
+    // }
 
-  // 5. Setup IPC Handlers (Now that services are loaded)
-  ipcMain.handle("category:create", async (_, name: string) => {
-    await createCategory(name);
-    return true;
-  });
+    // 5. Setup IPC Handlers (Now that services are loaded)
+    ipcMain.handle("category:create", async (_, name: string) => {
+      try {
+        await createCategory(name);
+        return true;
+      } catch (error) {
+        console.error("[IPC] category:create failed:", error);
+        return {
+          success: false,
+          error: "Failed to create category",
+        };
+      }
+    });
 
-  ipcMain.handle("category:getAll", async () => {
-    return getAllCategories();
-  });
+    ipcMain.handle("category:getAll", async () => {
+      try {
+        const categories = await getAllCategories();
 
-  ipcMain.handle("product:getAll", async () => {
-    return getAllProducts();
-  });
+        return {
+          success: true,
+          data: categories,
+        };
+      } catch (error) {
+        console.error("[IPC] category:getAll failed:", error);
 
-  ipcMain.handle("customer:getAll", async () => {
-    return getAllCustomers();
-  });
+        return {
+          success: false,
+          error: "Failed to fetch categories",
+        };
+      }
+    });
 
-  // 6. Finally, Create Window
-  createWindow();
+    ipcMain.handle("product:getAll", async () => {
+      try {
+        const products = await getAllProducts();
+
+        return {
+          success: true,
+          data: products,
+        };
+      } catch (error) {
+        console.error("[IPC] product:getAll failed:", error);
+
+        return {
+          success: false,
+          error: "Failed to fetch products",
+        };
+      }
+    });
+
+    ipcMain.handle("customer:getAll", async () => {
+      try {
+        const customers = await getAllCustomers();
+
+        return {
+          success: true,
+          data: customers,
+        };
+      } catch (error) {
+        console.error("[IPC] customer:getAll failed:", error);
+
+        return {
+          success: false,
+          error: "Failed to fetch customers",
+        };
+      }
+    });
+
+    // 6. Finally, Create Window
+    createWindow();
+  } catch (fatalError) {
+    console.error("App failed to start:", fatalError);
+    app.quit();
+  }
 });
