@@ -1,4 +1,8 @@
 import { useEffect } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import AdminLayout from "./ui/layouts/AdminLayout";
+import POSLayout from "./ui/layouts/POSLayout";
+import { adminRoutes } from "./ui/routes/admin.routes";
 
 function App() {
   useEffect(() => {
@@ -8,17 +12,21 @@ function App() {
   }, []);
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "Segoe UI, sans-serif",
-      }}
-    >
-      <h1>Hardware Store POS</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/admin" element={<AdminLayout />}>
+          {adminRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path.replace("/admin", "")}
+              element={route.element}
+            />
+          ))}
+        </Route>
+
+        <Route path="/pos" element={<POSLayout />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
