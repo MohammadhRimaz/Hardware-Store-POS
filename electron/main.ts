@@ -96,7 +96,10 @@ app.whenReady().then(async () => {
     ipcMain.handle("category:create", async (_, name: string) => {
       try {
         await createCategory(name);
-        return true;
+        return {
+          success: true,
+          data: null,
+        };
       } catch (error) {
         console.error("[IPC] category:create failed:", error);
         return {
