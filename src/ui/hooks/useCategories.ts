@@ -1,48 +1,39 @@
 import { useEffect, useState } from "react";
+import { ipc } from "../api/ipc";
 
-interface UseCategoriesResult {
-  data: any[];
-  loading: boolean;
-  error: string | null;
-}
+type Category = {
+  id: number;
+  name: string;
+};
 
-export function useCategories(): UseCategoriesResult {
-  const [data, setData] = useState<any[]>([]);
+export function useCategories() {
+  const [data, setData] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  async function fetchCategories() {
+    setLoading(true);
+    setError(null);
 
-    async function fetchCategories() {
-      try {
-        const response = await window.api.getCategories();
+    const data = await ipc.getCategories();
 
-        if (!mounted) return;
+    setData(data);
+    setLoading(false);
+  }
 
-        if (response.success) {
-          setData(response.data);
-          setError(null);
-        } else {
-          setError(response.error);
-          setData([]);
-        }
-      } catch (err) {
-        if (!mounted) return;
-
-        setError("Unexpected error while fetching categories");
-        setData([]);
-      } finally {
-        if (mounted) setLoading(false);
-      }
+  async function createCategory(name: string) {
+    if (!name.trim()) {
+      throw new Error("Category name is required.");
     }
 
-    fetchCategories();
+    await ipc.createCategory(name.trim());
 
-    return () => {
-      mounted = false;
-    };
+    await fetchCategories(); // refresh from truth
+  }
+
+  useEffect(() => {
+    fetchCategories();
   }, []);
 
-  return { data, loading, error };
+  return { data, loading, error, createCategory, refetch: fetchCategories };
 }

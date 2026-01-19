@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -14,7 +15,21 @@ import {
 import { useCategories } from "../../hooks/useCategories";
 
 export default function Categories() {
-  const { data: categories, loading, error } = useCategories();
+  const { data: categories, loading, error, createCategory } = useCategories();
+  const [newName, setNewName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleCreate() {
+    try {
+      setSubmitting(true);
+      await createCategory(newName);
+      setNewName("");
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   if (loading) {
     return <Typography>Loading categories...</Typography>;
@@ -35,17 +50,22 @@ export default function Categories() {
       </Typography>
 
       {/* Create Category Form */}
-      {/* <Stack direction="row" spacing={2} mb={2}>
+      <Stack direction="row" spacing={2} mb={2}>
         <TextField
           size="small"
           label="Category Name"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
+          disabled={submitting}
         />
-        <Button variant="contained" onClick={handleCreate}>
+        <Button
+          variant="contained"
+          onClick={handleCreate}
+          disabled={submitting || !newName.trim()}
+        >
           Add
         </Button>
-      </Stack> */}
+      </Stack>
 
       {/* Table */}
       <Paper elevation={1}>
