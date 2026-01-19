@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -13,89 +12,25 @@ import {
   MenuItem,
   Stack,
 } from "@mui/material";
-import { ipc } from "../../api/ipc";
-
-type Category = {
-  id: number;
-  name: string;
-};
-
-type Product = {
-  id: number;
-  name: string;
-  brand?: string;
-  category_name: string;
-  stock_quantity: number;
-  sale_price: number;
-};
+import { useProducts } from "../../hooks/useProducts";
 
 export default function Products() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: products, loading, error } = useProducts();
 
   // Form state
-  const [name, setName] = useState("");
-  const [brand, setBrand] = useState("");
-  const [categoryId, setCategoryId] = useState<number | "">("");
-  const [salePrice, setSalePrice] = useState("");
-  const [stock, setStock] = useState("");
-
-  async function loadData() {
-    try {
-      const [productRes, categoryRes] = await Promise.all([
-        ipc.getProducts(),
-        ipc.getCategories(),
-      ]);
-
-      setProducts(productRes);
-      setCategories(categoryRes);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function handleCreateProduct() {
-    if (!name || !categoryId || !salePrice || !stock) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-
-    // try {
-    //   await ipc.createProduct({
-    //     name,
-    //     brand: brand || undefined,
-    //     category_id: categoryId,
-    //     sale_price: salePrice,
-    //     stock_quantity: stock,
-    //     cost_price: 0, // Placeholder, adjust as needed
-    //     reorder_level: 5,
-    //   });
-
-    //   // Clear form
-    //   setName("");
-    //   setBrand("");
-    //   setCategoryId("");
-    //   setSalePrice("");
-    //   setStock("");
-
-    //   // Refresh product list
-    //   await loadData();
-    // } catch(err: any){
-    //   alert(err.message);
-    // }
-  }
+  // const [name, setName] = useState("");
+  // const [brand, setBrand] = useState("");
+  // const [categoryId, setCategoryId] = useState<number | "">("");
+  // const [salePrice, setSalePrice] = useState("");
+  // const [stock, setStock] = useState("");
 
   if (loading) return <Typography>Loading Products...</Typography>;
 
   if (error) return <Typography color="error">{error}</Typography>;
+
+  if (products.length === 0) {
+    return <Typography>No products found.</Typography>;
+  }
 
   return (
     <Box>
@@ -104,7 +39,7 @@ export default function Products() {
       </Typography>
 
       {/* Create Product Form */}
-      <Paper sx={{ p: 2, mb: 3 }} elevation={1}>
+      {/* <Paper sx={{ p: 2, mb: 3 }} elevation={1}>
         <Typography variant="subtitle1" gutterBottom>
           Add Product
         </Typography>
@@ -160,7 +95,7 @@ export default function Products() {
             Create
           </Button>
         </Stack>
-      </Paper>
+      </Paper> */}
 
       {/* Products Table */}
       <Paper elevation={1}>

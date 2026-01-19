@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -12,48 +11,10 @@ import {
   Button,
   Stack,
 } from "@mui/material";
-import { ipc } from "../../api/ipc";
-
-type Category = {
-  id: number;
-  name: string;
-};
+import { useCategories } from "../../hooks/useCategories";
 
 export default function Categories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [newName, setNewName] = useState("");
-
-  const loadCategories = async () => {
-    setLoading(true);
-    try {
-      const data = await ipc.getCategories();
-      setCategories(data);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  const handleCreate = async () => {
-    if (!newName.trim()) return;
-
-    try {
-      await ipc.createCategory(newName.trim());
-      setNewName("");
-      await loadCategories(); // Refresh the list after creation
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message);
-    }
-  };
+  const { data: categories, loading, error } = useCategories();
 
   if (loading) {
     return <Typography>Loading categories...</Typography>;
@@ -63,6 +24,10 @@ export default function Categories() {
     return <Typography color="error">{error}</Typography>;
   }
 
+  if (categories.length === 0) {
+    return <Typography>No categories found.</Typography>;
+  }
+
   return (
     <Box>
       <Typography variant="h5" gutterBottom>
@@ -70,7 +35,7 @@ export default function Categories() {
       </Typography>
 
       {/* Create Category Form */}
-      <Stack direction="row" spacing={2} mb={2}>
+      {/* <Stack direction="row" spacing={2} mb={2}>
         <TextField
           size="small"
           label="Category Name"
@@ -80,7 +45,7 @@ export default function Categories() {
         <Button variant="contained" onClick={handleCreate}>
           Add
         </Button>
-      </Stack>
+      </Stack> */}
 
       {/* Table */}
       <Paper elevation={1}>
