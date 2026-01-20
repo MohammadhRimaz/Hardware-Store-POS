@@ -12,6 +12,7 @@ import {
   MenuItem,
   Stack,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 import { useProducts } from "../../hooks/useProducts";
 import { useState } from "react";
@@ -21,6 +22,7 @@ import { useCategories } from "../../hooks/useCategories";
 export default function Products() {
   const { data: products, loading, error, refresh } = useProducts();
   const { data: categories } = useCategories();
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Form state
   const [name, setName] = useState("");
@@ -30,8 +32,28 @@ export default function Products() {
   const [stock, setStock] = useState("");
 
   async function handleCreateProduct() {
-    if (!name || !categoryId || !salePrice || !stock) {
-      alert("Please fill in all required fields.");
+    setFormError(null);
+
+    if (!name.trim()) {
+      setFormError("Product name is required");
+      return;
+    }
+
+    if (!categoryId) {
+      setFormError("Category is required");
+      return;
+    }
+
+    const sale = Number(salePrice);
+    const qty = Number(stock);
+
+    if (!Number.isFinite(sale) || sale <= 0) {
+      setFormError("Sale price must be greater than zero");
+      return;
+    }
+
+    if (!Number.isInteger(qty) || qty < 0) {
+      setFormError("Stock must be a non-negative integer");
       return;
     }
 
@@ -39,9 +61,9 @@ export default function Products() {
       await ipc.createProduct({
         name,
         brand: brand || undefined,
-        category_id: Number(categoryId),
-        sale_price: Number(salePrice),
-        stock_quantity: Number(stock),
+        category_id: categoryId,
+        sale_price: sale,
+        stock_quantity: qty,
         cost_price: 0, // Placeholder, adjust as needed
         reorder_level: 5,
       });
@@ -80,6 +102,12 @@ export default function Products() {
         <Typography variant="subtitle1" gutterBottom>
           Add Product
         </Typography>
+
+        {formError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {formError}
+          </Alert>
+        )}
 
         <Stack direction="row" spacing={2} flexWrap="wrap">
           <TextField

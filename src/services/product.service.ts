@@ -14,18 +14,36 @@ export interface CreateProductInput {
   image?: string;
 }
 
-export async function createProduct(data: CreateProductInput) {
+export async function createProduct(input: CreateProductInput) {
+  const data = {
+    ...input,
+    name: input.name.trim(),
+    brand: input.brand?.trim() || null,
+    size: input.size?.trim() || null,
+    height: input.height?.trim() || null,
+    color: input.color?.trim() || null,
+    image: input.image?.trim() || null,
+  };
+
   // 1. Validate required fields
-  if (!data.name.trim()) {
+  if (!data.name) {
     throw new Error("Product name is required.");
   }
 
-  if (data.sale_price < 0 || data.cost_price < 0) {
-    throw new Error("Price cannot be negative.");
+  if (!Number.isFinite(data.sale_price) || data.sale_price <= 0) {
+    throw new Error("Sale price must be greater than zero");
   }
 
-  if (data.stock_quantity < 0) {
-    throw new Error("Stock quantity cannot be negative.");
+  if (!Number.isFinite(data.cost_price) || data.cost_price < 0) {
+    throw new Error("Cost price cannot be negative");
+  }
+
+  if (!Number.isInteger(data.stock_quantity) || data.stock_quantity < 0) {
+    throw new Error("Stock quantity must be a non-negative integer");
+  }
+
+  if (!Number.isInteger(data.reorder_level) || data.reorder_level < 0) {
+    throw new Error("Reorder level must be a non-negative integer");
   }
 
   // 2. Ensure category exists
