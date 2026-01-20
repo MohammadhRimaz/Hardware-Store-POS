@@ -13,6 +13,7 @@ export function useProducts(): UseProductsResult {
   const [error, setError] = useState<string | null>(null);
 
   async function fetchProducts() {
+    setLoading(true);
     try {
       const response = await window.api.getProducts();
 

@@ -61,7 +61,7 @@ export default function Products() {
       await ipc.createProduct({
         name,
         brand: brand || undefined,
-        category_id: categoryId,
+        category_id: categoryId as number,
         sale_price: sale,
         stock_quantity: qty,
         cost_price: 0, // Placeholder, adjust as needed

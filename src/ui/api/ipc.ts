@@ -1,3 +1,5 @@
+import { CreateProductInput } from "../../types/product";
+
 type IPCResponse<T> =
   | { success: true; data: T }
   | { success: false; error: string };
@@ -30,8 +32,8 @@ export const ipc = {
     unwrap(res);
   },
 
-  async createProduct(data: any) {
-    const res = await window.api.createProduct(data);
+  async createProduct(payload: CreateProductInput) {
+    const res = await window.api.createProduct(payload);
     unwrap(res);
   },
 };

@@ -1,18 +1,5 @@
 import db from "../database/knex";
-
-export interface CreateProductInput {
-  name: string;
-  brand?: string;
-  category_id: number;
-  size?: string;
-  height?: string;
-  color?: string;
-  cost_price: number;
-  sale_price: number;
-  stock_quantity: number;
-  reorder_level: number;
-  image?: string;
-}
+import { CreateProductInput } from "../types/product";
 
 export async function createProduct(input: CreateProductInput) {
   const data = {
@@ -28,6 +15,10 @@ export async function createProduct(input: CreateProductInput) {
   // 1. Validate required fields
   if (!data.name) {
     throw new Error("Product name is required.");
+  }
+
+  if (!Number.isInteger(data.category_id)) {
+    throw new Error("Valid category is required");
   }
 
   if (!Number.isFinite(data.sale_price) || data.sale_price <= 0) {
@@ -55,8 +46,19 @@ export async function createProduct(input: CreateProductInput) {
     throw new Error("Selected category does not exist");
   }
 
+  const cost = Number(data.cost_price);
+  const sale = Number(data.sale_price);
+  const stock = Number(data.stock_quantity);
+  const reorder = Number(data.reorder_level);
+
   // 3. Insert product into database
-  return await db("products").insert(data);
+  await db("products").insert({
+    ...data,
+    cost_price: cost,
+    sale_price: sale,
+    stock_quantity: stock,
+    reorder_level: reorder,
+  });
 }
 
 export async function getAllProducts() {
@@ -65,11 +67,55 @@ export async function getAllProducts() {
     .select("products.*", "categories.name as category_name");
 }
 
-export async function updateProductStock(
+// export async function updateProductStock(
+//   productId: number,
+//   quantityChange: number,
+// ) {
+//   return db("products")
+//     .where({ id: productId })
+//     .increment("stock_quantity", quantityChange);
+// }
+
+export async function reduceStock(
   productId: number,
-  quantityChange: number,
+  quantity: number,
+  trx = db,
 ) {
-  return db("products")
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new Error("Quantity to reduce must be a positive integer");
+  }
+
+  const product = await trx("products").where({ id: productId }).first();
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  if (product.stock_quantity < quantity) {
+    throw new Error(`Insufficient stock. Available: ${product.stock_quantity}`);
+  }
+
+  await trx("products")
     .where({ id: productId })
-    .increment("stock_quantity", quantityChange);
+    .update({ stock_quantity: product.stock_quantity - quantity });
+}
+
+export async function increaseStock(
+  productId: number,
+  quantity: number,
+  trx = db,
+) {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new Error("Quantity to increase must be a positive integer");
+  }
+
+  const product = await trx("products").where({ id: productId }).first();
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  await trx("products")
+    .where({ id: productId })
+    .update({ stock_quantity: product.quantity + quantity });
 }

@@ -1,6 +1,8 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createProduct } from "../src/services/product.service";
+import { CreateProductInput } from "../src/types/product";
 
 // ❌ REMOVE top-level DB/Service imports to prevent early loading
 // import db from "../src/database/knex";
@@ -125,11 +127,8 @@ app.whenReady().then(async () => {
       }
     });
 
-    ipcMain.handle("product:create", async (_, payload) => {
+    ipcMain.handle("product:create", async (_, payload: CreateProductInput) => {
       try {
-        const { createProduct } =
-          await import("../src/services/product.service");
-
         await createProduct(payload);
         return { success: true, data: null };
       } catch (error: any) {
