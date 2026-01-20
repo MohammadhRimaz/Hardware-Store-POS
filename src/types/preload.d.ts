@@ -8,6 +8,7 @@ declare global {
   interface Window {
     api: {
       createCategory: (name: string) => Promise<IPCResponse<null>>;
+      createProduct: (data: any) => Promise<IPCResponse<null>>;
       getCategories: () => Promise<IPCResponse<any[]>>;
       getProducts: () => Promise<IPCResponse<any[]>>;
       getCustomers: () => Promise<IPCResponse<any[]>>;

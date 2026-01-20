@@ -15,7 +15,30 @@ export interface CreateProductInput {
 }
 
 export async function createProduct(data: CreateProductInput) {
-  return db("products").insert(data);
+  // 1. Validate required fields
+  if (!data.name.trim()) {
+    throw new Error("Product name is required.");
+  }
+
+  if (data.sale_price < 0 || data.cost_price < 0) {
+    throw new Error("Price cannot be negative.");
+  }
+
+  if (data.stock_quantity < 0) {
+    throw new Error("Stock quantity cannot be negative.");
+  }
+
+  // 2. Ensure category exists
+  const category = await db("categories")
+    .where({ id: data.category_id })
+    .first();
+
+  if (!category) {
+    throw new Error("Selected category does not exist");
+  }
+
+  // 3. Insert product into database
+  return await db("products").insert(data);
 }
 
 export async function getAllProducts() {
@@ -26,7 +49,7 @@ export async function getAllProducts() {
 
 export async function updateProductStock(
   productId: number,
-  quantityChange: number
+  quantityChange: number,
 ) {
   return db("products")
     .where({ id: productId })

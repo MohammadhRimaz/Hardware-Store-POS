@@ -19,12 +19,19 @@ export const ipc = {
     const res = await window.api.getProducts();
     return unwrap(res);
   },
+
   async getCustomers() {
     const res = await window.api.getCustomers();
     return unwrap(res);
   },
+
   async createCategory(name: string) {
     const res = await window.api.createCategory(name);
+    unwrap(res);
+  },
+
+  async createProduct(data: any) {
+    const res = await window.api.createProduct(data);
     unwrap(res);
   },
 };

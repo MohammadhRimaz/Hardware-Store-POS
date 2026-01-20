@@ -71,13 +71,11 @@ app.whenReady().then(async () => {
     // const { default: db } = await import("../src/database/knex");
 
     // Import services dynamically
-    const { createCategory, getAllCategories } = await import(
-      "../src/services/category.service"
-    );
+    const { createCategory, getAllCategories } =
+      await import("../src/services/category.service");
     const { getAllProducts } = await import("../src/services/product.service");
-    const { getAllCustomers } = await import(
-      "../src/services/customer.service"
-    );
+    const { getAllCustomers } =
+      await import("../src/services/customer.service");
 
     // 4. Run Migrations Automatically
     // This creates the tables if they don't exist
@@ -123,6 +121,23 @@ app.whenReady().then(async () => {
         return {
           success: false,
           error: "Failed to fetch categories",
+        };
+      }
+    });
+
+    ipcMain.handle("product:create", async (_, payload) => {
+      try {
+        const { createProduct } =
+          await import("../src/services/product.service");
+
+        await createProduct(payload);
+        return { success: true, data: null };
+      } catch (error: any) {
+        console.error("[IPC] product:create failed:", error);
+
+        return {
+          success: false,
+          error: error.message || "Failed to create product",
         };
       }
     });

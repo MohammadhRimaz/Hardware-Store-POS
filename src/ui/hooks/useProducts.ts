@@ -4,6 +4,7 @@ interface UseProductsResult {
   data: any[];
   loading: boolean;
   error: string | null;
+  refresh: () => Promise<void>;
 }
 
 export function useProducts(): UseProductsResult {
@@ -11,37 +12,26 @@ export function useProducts(): UseProductsResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  async function fetchProducts() {
+    try {
+      const response = await window.api.getProducts();
 
-    async function fetchProducts() {
-      try {
-        const response = await window.api.getProducts();
-
-        if (!mounted) return;
-
-        if (response.success) {
-          setData(response.data);
-          setError(null);
-        } else {
-          setError(response.error);
-          setData([]);
-        }
-      } catch (error) {
-        if (!mounted) return;
-        setError("Unexpected error while fetching products");
-        setData([]);
-      } finally {
-        if (mounted) setLoading(false);
+      if (response.success) {
+        setData(response.data);
+        setError(null);
+      } else {
+        setError(response.error);
       }
+    } catch (error) {
+      setError("Unexpected error while fetching products");
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     fetchProducts();
-
-    return () => {
-      mounted = false;
-    };
   }, []);
 
-  return { data, loading, error };
+  return { data, loading, error, refresh: fetchProducts };
 }

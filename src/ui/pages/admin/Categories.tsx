@@ -19,7 +19,7 @@ export default function Categories() {
   const [newName, setNewName] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleCreate() {
+  async function handleCreateCategory() {
     try {
       setSubmitting(true);
       await createCategory(newName);
@@ -60,7 +60,7 @@ export default function Categories() {
         />
         <Button
           variant="contained"
-          onClick={handleCreate}
+          onClick={handleCreateCategory}
           disabled={submitting || !newName.trim()}
         >
           Add

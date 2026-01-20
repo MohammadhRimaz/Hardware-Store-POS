@@ -11,26 +11,63 @@ import {
   Button,
   MenuItem,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 import { useProducts } from "../../hooks/useProducts";
+import { useState } from "react";
+import { ipc } from "../../api/ipc";
+import { useCategories } from "../../hooks/useCategories";
 
 export default function Products() {
-  const { data: products, loading, error } = useProducts();
+  const { data: products, loading, error, refresh } = useProducts();
+  const { data: categories } = useCategories();
 
   // Form state
-  // const [name, setName] = useState("");
-  // const [brand, setBrand] = useState("");
-  // const [categoryId, setCategoryId] = useState<number | "">("");
-  // const [salePrice, setSalePrice] = useState("");
-  // const [stock, setStock] = useState("");
+  const [name, setName] = useState("");
+  const [brand, setBrand] = useState("");
+  const [categoryId, setCategoryId] = useState<number | "">("");
+  const [salePrice, setSalePrice] = useState("");
+  const [stock, setStock] = useState("");
 
-  if (loading) return <Typography>Loading Products...</Typography>;
+  async function handleCreateProduct() {
+    if (!name || !categoryId || !salePrice || !stock) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      await ipc.createProduct({
+        name,
+        brand: brand || undefined,
+        category_id: Number(categoryId),
+        sale_price: Number(salePrice),
+        stock_quantity: Number(stock),
+        cost_price: 0, // Placeholder, adjust as needed
+        reorder_level: 5,
+      });
+
+      // Clear form
+      setName("");
+      setBrand("");
+      setCategoryId("");
+      setSalePrice("");
+      setStock("");
+
+      // Refresh product list
+      await refresh();
+    } catch (err: any) {
+      alert(err.message || "Failed to create product");
+    }
+  }
+
+  if (loading)
+    return (
+      <Box sx={{ p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
 
   if (error) return <Typography color="error">{error}</Typography>;
-
-  if (products.length === 0) {
-    return <Typography>No products found.</Typography>;
-  }
 
   return (
     <Box>
@@ -39,7 +76,7 @@ export default function Products() {
       </Typography>
 
       {/* Create Product Form */}
-      {/* <Paper sx={{ p: 2, mb: 3 }} elevation={1}>
+      <Paper sx={{ p: 2, mb: 3 }} elevation={1}>
         <Typography variant="subtitle1" gutterBottom>
           Add Product
         </Typography>
@@ -95,34 +132,38 @@ export default function Products() {
             Create
           </Button>
         </Stack>
-      </Paper> */}
+      </Paper>
 
       {/* Products Table */}
-      <Paper elevation={1}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Brand</TableCell>
-              <TableCell>Stock</TableCell>
-              <TableCell>Sale Price</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {products.map((p) => (
-              <TableRow key={p.id}>
-                <TableCell>{p.name}</TableCell>
-                <TableCell>{p.category_name}</TableCell>
-                <TableCell>{p.brand ?? "-"}</TableCell>
-                <TableCell>{p.stock_quantity}</TableCell>
-                <TableCell>{p.sale_price}</TableCell>
+      {products.length === 0 ? (
+        <Typography>No products found. Add your first one above!</Typography>
+      ) : (
+        <Paper elevation={1}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Category</TableCell>
+                <TableCell>Brand</TableCell>
+                <TableCell>Stock</TableCell>
+                <TableCell>Sale Price</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Paper>
+            </TableHead>
+
+            <TableBody>
+              {products.map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell>{p.name}</TableCell>
+                  <TableCell>{p.category_name}</TableCell>
+                  <TableCell>{p.brand ?? "-"}</TableCell>
+                  <TableCell>{p.stock_quantity}</TableCell>
+                  <TableCell>{p.sale_price}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
+      )}
     </Box>
   );
 }
