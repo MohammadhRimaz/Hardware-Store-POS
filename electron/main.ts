@@ -1,8 +1,13 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createProduct } from "../src/services/product.service";
+import { createProduct, getAllProducts } from "../src/services/product.service";
 import { CreateProductInput } from "../src/types/product";
+import { CreateCustomerInput } from "../src/types/customer";
+import {
+  getAllCustomers,
+  createCustomer,
+} from "../src/services/customer.service";
 
 // ❌ REMOVE top-level DB/Service imports to prevent early loading
 // import db from "../src/database/knex";
@@ -75,9 +80,6 @@ app.whenReady().then(async () => {
     // Import services dynamically
     const { createCategory, getAllCategories } =
       await import("../src/services/category.service");
-    const { getAllProducts } = await import("../src/services/product.service");
-    const { getAllCustomers } =
-      await import("../src/services/customer.service");
 
     // 4. Run Migrations Automatically
     // This creates the tables if they don't exist
@@ -93,7 +95,7 @@ app.whenReady().then(async () => {
     // }
 
     // 5. Setup IPC Handlers (Now that services are loaded)
-    ipcMain.handle("category:create", async (_, name: string) => {
+    ipcMain.handle("categories:create", async (_, name: string) => {
       try {
         await createCategory(name);
         return {
@@ -101,7 +103,7 @@ app.whenReady().then(async () => {
           data: null,
         };
       } catch (error) {
-        console.error("[IPC] category:create failed:", error);
+        console.error("[IPC] categories:create failed:", error);
         return {
           success: false,
           error: "Failed to create category",
@@ -109,7 +111,7 @@ app.whenReady().then(async () => {
       }
     });
 
-    ipcMain.handle("category:getAll", async () => {
+    ipcMain.handle("categories:getAll", async () => {
       try {
         const categories = await getAllCategories();
 
@@ -127,21 +129,24 @@ app.whenReady().then(async () => {
       }
     });
 
-    ipcMain.handle("product:create", async (_, payload: CreateProductInput) => {
-      try {
-        await createProduct(payload);
-        return { success: true, data: null };
-      } catch (error: any) {
-        console.error("[IPC] product:create failed:", error);
+    ipcMain.handle(
+      "products:create",
+      async (_, payload: CreateProductInput) => {
+        try {
+          await createProduct(payload);
+          return { success: true, data: null };
+        } catch (error: any) {
+          console.error("[IPC] product:create failed:", error);
 
-        return {
-          success: false,
-          error: error.message || "Failed to create product",
-        };
-      }
-    });
+          return {
+            success: false,
+            error: error.message || "Failed to create product",
+          };
+        }
+      },
+    );
 
-    ipcMain.handle("product:getAll", async () => {
+    ipcMain.handle("products:getAll", async () => {
       try {
         const products = await getAllProducts();
 
@@ -159,7 +164,23 @@ app.whenReady().then(async () => {
       }
     });
 
-    ipcMain.handle("customer:getAll", async () => {
+    ipcMain.handle(
+      "customers:create",
+      async (_event, payload: CreateCustomerInput) => {
+        try {
+          await createCustomer(payload);
+          return { success: true, data: null };
+        } catch (error: any) {
+          console.error("[IPC] customers:create failed:", error);
+          return {
+            success: false,
+            error: error.message || "Failed to create customer",
+          };
+        }
+      },
+    );
+
+    ipcMain.handle("customers:getAll", async () => {
       try {
         const customers = await getAllCustomers();
 

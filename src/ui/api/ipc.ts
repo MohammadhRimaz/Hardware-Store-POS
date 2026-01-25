@@ -1,4 +1,5 @@
 import { CreateProductInput } from "../../types/product";
+import { CreateCustomerInput } from "../../types/customer";
 
 type IPCResponse<T> =
   | { success: true; data: T }
@@ -34,6 +35,11 @@ export const ipc = {
 
   async createProduct(payload: CreateProductInput) {
     const res = await window.api.createProduct(payload);
+    unwrap(res);
+  },
+
+  async createCustomer(payload: CreateCustomerInput) {
+    const res = await window.api.createCustomer(payload);
     unwrap(res);
   },
 };

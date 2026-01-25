@@ -14,11 +14,14 @@ export function useCategories() {
   async function fetchCategories() {
     setLoading(true);
     setError(null);
-
-    const data = await ipc.getCategories();
-
-    setData(data);
-    setLoading(false);
+    try {
+      const data = await ipc.getCategories();
+      setData(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function createCategory(name: string) {

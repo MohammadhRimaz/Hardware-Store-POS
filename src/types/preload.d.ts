@@ -1,3 +1,6 @@
+import { CreateCustomerInput } from "./customer";
+import { CreateProductInput } from "./product";
+
 export {};
 
 type IPCResponse<T> =
@@ -10,6 +13,9 @@ declare global {
       createCategory: (name: string) => Promise<IPCResponse<null>>;
       createProduct: (
         payload: CreateProductInput,
+      ) => Promise<IPCResponse<null>>;
+      createCustomer: (
+        payload: CreateCustomerInput,
       ) => Promise<IPCResponse<null>>;
       getCategories: () => Promise<IPCResponse<any[]>>;
       getProducts: () => Promise<IPCResponse<any[]>>;

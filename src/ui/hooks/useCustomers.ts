@@ -1,47 +1,33 @@
 import { useEffect, useState } from "react";
+import { ipc } from "../api/ipc";
 
-interface UseCustomersResult {
-  data: any[];
-  loading: boolean;
-  error: string | null;
-}
-
-export function useCustomers(): UseCustomersResult {
-  const [data, setData] = useState<any[]>([]);
+export function useCustomers() {
+  const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  async function fetchCustomers() {
+    setLoading(true);
+    setError(null);
 
-    async function fetchCustomers() {
-      try {
-        const response = await window.api.getCustomers();
-
-        if (!mounted) return;
-
-        if (response.success) {
-          setData(response.data);
-          setError(null);
-        } else {
-          setError(response.error);
-          setData([]);
-        }
-      } catch (error) {
-        if (!mounted) return;
-        setError("Unexpected error while fetching customers");
-        setData([]);
-      } finally {
-        if (mounted) setLoading(false);
-      }
+    try {
+      const data = await ipc.getCustomers();
+      setCustomers(data);
+    } catch (error: any) {
+      setError(error.message || "Failed to fetch customers.");
+    } finally {
+      setLoading(false);
     }
+  }
 
+  async function createCustomer(payload: { name: string; contact?: string }) {
+    await ipc.createCustomer(payload);
+    await fetchCustomers(); // refresh from truth
+  }
+
+  useEffect(() => {
     fetchCustomers();
-
-    return () => {
-      mounted = false;
-    };
   }, []);
 
-  return { data, loading, error };
+  return { customers, loading, error, reload: fetchCustomers, createCustomer };
 }

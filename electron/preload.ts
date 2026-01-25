@@ -1,4 +1,6 @@
 import { ipcRenderer, contextBridge } from "electron";
+import { CreateCustomerInput } from "../src/types/customer";
+import { CreateProductInput } from "../src/types/product";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("api", {
@@ -23,13 +25,17 @@ contextBridge.exposeInMainWorld("api", {
   // ...
 
   // Categories
-  createCategory: (name: string) => ipcRenderer.invoke("category:create", name),
-
-  getCategories: () => ipcRenderer.invoke("category:getAll"),
+  createCategory: (name: string) =>
+    ipcRenderer.invoke("categories:create", name),
+  getCategories: () => ipcRenderer.invoke("categories:getAll"),
 
   // Products
-  getProducts: () => ipcRenderer.invoke("product:getAll"),
+  getProducts: () => ipcRenderer.invoke("products:getAll"),
+  createProduct: (payload: CreateProductInput) =>
+    ipcRenderer.invoke("products:create", payload),
 
   // Customers
-  getCustomers: () => ipcRenderer.invoke("customer:getAll"),
+  getCustomers: () => ipcRenderer.invoke("customers:getAll"),
+  createCustomer: (payload: CreateCustomerInput) =>
+    ipcRenderer.invoke("customers:create", payload),
 });
