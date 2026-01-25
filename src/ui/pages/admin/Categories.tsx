@@ -43,10 +43,6 @@ export default function Categories() {
     return <Typography color="error">{error}</Typography>;
   }
 
-  if (categories.length === 0) {
-    return <Typography>No categories found.</Typography>;
-  }
-
   return (
     <Box>
       <Typography variant="h5" gutterBottom>
@@ -54,24 +50,30 @@ export default function Categories() {
       </Typography>
 
       {/* Create Category Form */}
-      <Stack direction="row" spacing={2} mb={2}>
-        <TextField
-          size="small"
-          label="Category Name"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          disabled={submitting}
-        />
-        <Button
-          variant="contained"
-          onClick={handleCreateCategory}
-          disabled={submitting || !newName.trim()}
-        >
-          Add
-        </Button>
-      </Stack>
+      <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          Add Category
+        </Typography>
 
-      {/* Table */}
+        <Stack direction="row" spacing={2} alignItems="center">
+          <TextField
+            size="small"
+            label="Category Name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            disabled={submitting}
+          />
+          <Button
+            variant="contained"
+            onClick={handleCreateCategory}
+            disabled={submitting || !newName.trim()}
+          >
+            Add
+          </Button>
+        </Stack>
+      </Paper>
+
+      {/*Category Table */}
       <Paper elevation={1}>
         <Table size="small">
           <TableHead>
@@ -82,12 +84,20 @@ export default function Categories() {
           </TableHead>
 
           <TableBody>
-            {categories.map((cat) => (
-              <TableRow key={cat.id}>
-                <TableCell>{cat.id}</TableCell>
-                <TableCell>{cat.name}</TableCell>
+            {categories.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3}>
+                  <Typography>No categories found.</Typography>
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              categories.map((cat) => (
+                <TableRow key={cat.id}>
+                  <TableCell>{cat.id}</TableCell>
+                  <TableCell>{cat.name}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Paper>
