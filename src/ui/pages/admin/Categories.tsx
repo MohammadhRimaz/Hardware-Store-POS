@@ -11,6 +11,7 @@ import {
   TextField,
   Button,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 import { useCategories } from "../../hooks/useCategories";
 
@@ -31,9 +32,12 @@ export default function Categories() {
     }
   }
 
-  if (loading) {
-    return <Typography>Loading categories...</Typography>;
-  }
+  if (loading)
+    return (
+      <Box sx={{ p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
 
   if (error) {
     return <Typography color="error">{error}</Typography>;
