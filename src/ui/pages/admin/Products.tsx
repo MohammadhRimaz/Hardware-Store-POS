@@ -20,7 +20,7 @@ import { ipc } from "../../api/ipc";
 import { useCategories } from "../../hooks/useCategories";
 
 export default function Products() {
-  const { data: products, loading, error, refresh } = useProducts();
+  const { products, loading, error, refresh } = useProducts();
   const { data: categories } = useCategories();
   const [formError, setFormError] = useState<string | null>(null);
 
