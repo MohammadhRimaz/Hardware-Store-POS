@@ -11,11 +11,12 @@ import {
   Button,
   Stack,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import { useCustomers } from "../../hooks/useCustomers";
 
 export default function Customers() {
-  const { customers, loading, error, createCustomer } = useCustomers();
+  const { customers, loading, error, createCustomer, reload } = useCustomers();
 
   // Form State
   const [name, setName] = useState("");
@@ -35,6 +36,9 @@ export default function Customers() {
       // Reset form
       setName("");
       setContact("");
+
+      // Refresh customer list
+      await reload();
     } catch (error: any) {
       console.error("Failed to create customer:", error);
       alert(error.message);
@@ -43,9 +47,12 @@ export default function Customers() {
     }
   }
 
-  if (loading) {
-    return <Typography>Loading customers...</Typography>;
-  }
+  if (loading)
+    return (
+      <Box sx={{ p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
 
   if (error) {
     return <Typography color="error">{error}</Typography>;

@@ -16,11 +16,10 @@ import {
 } from "@mui/material";
 import { useProducts } from "../../hooks/useProducts";
 import { useState } from "react";
-import { ipc } from "../../api/ipc";
 import { useCategories } from "../../hooks/useCategories";
 
 export default function Products() {
-  const { products, loading, error, refresh } = useProducts();
+  const { products, loading, error, refresh, createProduct } = useProducts();
   const { data: categories } = useCategories();
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -58,7 +57,7 @@ export default function Products() {
     }
 
     try {
-      await ipc.createProduct({
+      await createProduct({
         name,
         brand: brand || undefined,
         category_id: categoryId as number,
